@@ -13,6 +13,7 @@ struct product{
 void addproduct();
 void updateproduct();
 void showproduct();
+void deleteproduct();
 int menu();
 
 int main(void){
@@ -24,11 +25,13 @@ int menu(){
 
     while(1){
     int choice;
-    
+
     printf("\n******ISLEM LISTESI******\n");
     printf("1-Urun Ekleme\n");
     printf("2-Urun Guncelleme\n");
     printf("3-Urun Goster\n");
+    printf("4-Urun Silme\n");
+    printf("5-Cikis");
     printf("Secim yapiniz: ");
     scanf("%d",&choice);
     switch (choice){
@@ -46,6 +49,10 @@ int menu(){
         break;
 
         case 4:
+        deleteproduct();
+        break;
+
+        case 5:
         printf("Basariyla cikis yapildi!");
         return 0;
         
@@ -119,4 +126,42 @@ void showproduct() {
         printf("----------------------\n");
     }
     fclose(file);
+}
+
+void deleteproduct(){
+    struct product p;
+    int delete_id;
+    int found = 0;
+
+    FILE* file = fopen(FILENAME, "rb");
+    FILE* temp = fopen("temp.dat", "wb");
+
+    if (file == NULL || temp == NULL) {
+        printf("Dosya acilamadi.\n");
+        return;
+    }
+
+    printf("Silmek istediginiz urunun ID'sini giriniz: ");
+    scanf("%d", &delete_id);
+
+    while (fread(&p, sizeof(struct product), 1, file) == 1) {
+        if (p.id != delete_id) {
+            fwrite(&p, sizeof(struct product), 1, temp);
+        } else {
+            found = 1;
+        }
+    }
+
+    fclose(file);
+    fclose(temp);
+
+    if (found) {
+        remove(FILENAME);              
+        rename("temp.dat", FILENAME);  
+        printf("Urun basariyla silindi.\n");
+    } else {
+        remove("temp.dat");
+        printf("ID bulunamadi. Silme islemi basarisiz.\n");
+    }
+
 }
